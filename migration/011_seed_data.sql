@@ -1,0 +1,87 @@
+-- ============================================================================
+-- 011_seed_data.sql
+-- TEMPLATE: Fill with your actual production data
+-- Run AFTER all table/function migrations (001-010)
+-- ============================================================================
+
+-- =============================================
+-- SEED DATA - Replace placeholders with your values
+-- =============================================
+
+-- ============================================================================
+-- 1. Chat_Agents (at least one ticket bot required -- requests reference this)
+-- ============================================================================
+-- INSERT INTO public."Chat_Agents" (id, workspace_id, profile_id, bot_name) VALUES
+--     ('YOUR_AGENT_UUID', 'YOUR_WORKSPACE_UUID', 'YOUR_PROFILE_UUID', 'MGM Ticket Bot');
+
+-- ============================================================================
+-- 2. Hierarchy levels (per workspace)
+--    Define your approval chain levels
+-- ============================================================================
+-- INSERT INTO public.hierarchy (workspace_id, level, level_name, reports_to_level, data) VALUES
+--     ('YOUR_WORKSPACE_UUID', 1, 'Executive',      2,    '{}'),
+--     ('YOUR_WORKSPACE_UUID', 2, 'Sr. Executive',   3,    '{}'),
+--     ('YOUR_WORKSPACE_UUID', 3, 'Manager',         4,    '{}'),
+--     ('YOUR_WORKSPACE_UUID', 4, 'General Manager',  5,    '{}'),
+--     ('YOUR_WORKSPACE_UUID', 5, 'Vice President',   6,    '{}'),
+--     ('YOUR_WORKSPACE_UUID', 6, 'Managing Director', NULL, '{}'),
+--     ('YOUR_WORKSPACE_UUID', 7, 'Director',         NULL, '{}'),
+--     ('YOUR_WORKSPACE_UUID', 8, 'AOP',              NULL, '{}'),
+--     ('YOUR_WORKSPACE_UUID', 9, 'Board',            NULL, '{}');
+
+-- ============================================================================
+-- 3. Units (business units per workspace)
+-- ============================================================================
+-- INSERT INTO public.units (workspace_id, code, name, email_domain) VALUES
+--     ('YOUR_WORKSPACE_UUID', 'HC',    'MGM HealthCare',          '@mgmhealthcare.in'),
+--     ('YOUR_WORKSPACE_UUID', 'CI',    'MGM Cancer Institute',    '@mgmcancerinstitute.in'),
+--     ('YOUR_WORKSPACE_UUID', 'Malar', 'MGM HC Malar',            '@mgmhcmalar.in'),
+--     ('YOUR_WORKSPACE_UUID', 'SH',    'MGM Seven Hills (Vizag)', '@mgmsevenhills.in')
+-- ON CONFLICT (workspace_id, code) DO UPDATE SET
+--     name = EXCLUDED.name,
+--     email_domain = EXCLUDED.email_domain,
+--     updated_at = NOW();
+
+-- ============================================================================
+-- 4. Members (initial team)
+--    Set hierarchy_level, reports_to, unit_id, feature_access, is_owner
+-- ============================================================================
+-- INSERT INTO public.members (
+--     workspace_id, profile_id, email, name,
+--     hierarchy_level, reports_to, unit_id,
+--     designation, department, status, is_owner, is_active,
+--     feature_access, seen
+-- ) VALUES
+--     ('YOUR_WORKSPACE_UUID', 'PROFILE_UUID', 'user@example.com', 'Full Name',
+--      6, NULL, NULL,
+--      'Owner', 'Management', 'active', true, true,
+--      '{"tickets": "editor", "help_desk": "editor"}', true);
+-- Repeat for each team member...
+
+-- ============================================================================
+-- 5. Rules (approval routing rules)
+--    Define amount-based or simple approval chains
+-- ============================================================================
+-- INSERT INTO public.rules (workspace_id, chat_agent_id, rule_name, rule_type, category, data) VALUES
+--     ('YOUR_WORKSPACE_UUID', 'YOUR_AGENT_UUID', 'Purchase Request', 'amount_based', 'finance',
+--      '{
+--          "type": "amount_based",
+--          "field": "amount",
+--          "currency": "INR",
+--          "levels": {
+--              "1": {"max": 10000, "escalate_to": 2},
+--              "2": {"max": 50000, "escalate_to": 3},
+--              "3": {"max": 200000, "escalate_to": 4},
+--              "4": {"max": null, "final": true}
+--          },
+--          "sla_hours": 48,
+--          "required_fields": ["amount", "purpose", "vendor"]
+--      }');
+-- Repeat for DOA CapEx, Payment Request, etc.
+
+-- ============================================================================
+-- 6. Products (optional -- only if using product-based purchase flow)
+-- ============================================================================
+-- INSERT INTO public.products (workspace_id, chat_agent_id, name, cost, category, aliases, fields) VALUES
+--     ('YOUR_WORKSPACE_UUID', 'YOUR_AGENT_UUID', 'Laptop', 75000, 'IT Equipment',
+--      '["notebook", "computer"]', '[{"name": "brand", "type": "text"}, {"name": "specs", "type": "text"}]');
